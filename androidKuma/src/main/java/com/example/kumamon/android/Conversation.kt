@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.BottomAppBar
@@ -20,17 +21,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun Conversation(messages: List<Chat>, onSend: (String)->Unit) {
+fun Conversation(viewModel: MainViewModel) {
     var currentMsg by rememberSaveable { mutableStateOf("") }
-
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
     Scaffold(
         bottomBar = {
             BottomAppBar {
@@ -49,9 +56,14 @@ fun Conversation(messages: List<Chat>, onSend: (String)->Unit) {
                         singleLine = true
                     )
                     Spacer(modifier = Modifier.width(8.dp))
+                    val softKeyboard = LocalSoftwareKeyboardController.current
                     Button(onClick = {
-                        onSend(currentMsg)
+                        viewModel.onSubmit(currentMsg)
                         currentMsg = ""
+                        softKeyboard?.hide()
+                        coroutineScope.launch {
+                            listState.animateScrollToItem(viewModel.conversation.size-1)
+                        }
                     }) {
                         Text("Send")
                     }
@@ -59,15 +71,38 @@ fun Conversation(messages: List<Chat>, onSend: (String)->Unit) {
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-        ) {
-            items(messages) { message ->
-                ChatBubble(message)
+        if (viewModel.isLoading) {
+            // Loading State for Reply
+        } else {
+            Log.d("TRACE", "Entering succcess state")
+            printList(viewModel.conversation)
+
+            if (viewModel.errorMsg.isBlank()) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .padding(innerPadding)
+                ) {
+                    items(viewModel.conversation) { message ->
+                        ChatBubble(message)
+                    }
+                }
+            } else {
+                // append error message and retry to bottom
             }
         }
     }
+}
+
+private fun printList(chats: List<Chat>) {
+    val sb = StringBuilder("")
+    for(i in chats.indices) {
+        sb.append(chats[i].message)
+        if (i != chats.size-1) {
+            sb.append(", ")
+        }
+    }
+    Log.d("TRACE", "observe conversation=${sb.toString()}")
 }
 
 @Composable
