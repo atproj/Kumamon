@@ -6,19 +6,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.kumamon.Greeting
-import kotlinx.coroutines.launch
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.collectAsState
 
 class MainActivity : ComponentActivity() {
 
@@ -27,28 +21,36 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val uiState = viewModel.uiState.collectAsState()
             MyApplicationTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val scope = rememberCoroutineScope()
-                    var text by remember { mutableStateOf("Loading") }
-                    LaunchedEffect(true) {
-                        scope.launch {
-                            text = try {
-                                Greeting().greeting()
-                            } catch (e: Exception) {
-                                e.localizedMessage ?: "error"
+                    when (val state = uiState.value) {
+                        is Result.Success<List<Chat>> -> {
+                            printList(state.value)
+                            Conversation(messages = state.value) { submission ->
+                                viewModel.onSubmit(submission)
                             }
                         }
+                        is Result.Failure -> { }
+                        is Result.Loading -> { }
                     }
-
-                    //GreetingView(text)
-                    //GreetingView(Greeting().greet())
                 }
             }
         }
+    }
+
+    private fun printList(chats: List<Chat>) {
+        val sb = StringBuilder("")
+        for(i in chats.indices) {
+            sb.append(chats[i].message)
+            if (i != chats.size-1) {
+                sb.append(", ")
+            }
+        }
+        Log.d("TRACE", "observe conversation=${sb.toString()}")
     }
 }
 
