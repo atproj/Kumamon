@@ -8,7 +8,7 @@ class ViewModelFactory: ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-            return MainViewModel(OaiModel) as T
+            return MainViewModel(model = OaiModel) as T
         }
         throw IllegalArgumentException("${modelClass.simpleName} is not a recognized viewmodel")
     }

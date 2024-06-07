@@ -11,7 +11,7 @@ class KumamonApp: Application() {
 
     override fun onCreate() {
         super.onCreate()
-        GlobalScope.launch(Dispatchers.IO) {
+        /*GlobalScope.launch(Dispatchers.IO) {
             try {
                 OaiModel.init(
                     apiKey = OaiModel.API_KEY,
@@ -20,7 +20,7 @@ class KumamonApp: Application() {
             } catch (ex: Exception) {
                 Log.d("TRACE", "problem in OaiModel.init is ${ex.message}")
             }
-        }
+        }*/
 
     }
 }
