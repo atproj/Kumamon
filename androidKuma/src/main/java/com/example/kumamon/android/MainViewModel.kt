@@ -10,8 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-data class Chat(val message: String, val fromUser: Boolean)
-
 class MainViewModel(private val model: LangMod,
                     private val dispatcher: CoroutineDispatcher = Dispatchers.IO): ViewModel() {
 
