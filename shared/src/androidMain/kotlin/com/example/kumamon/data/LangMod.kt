@@ -29,6 +29,7 @@ object OaiModel: LangMod {
     private var modelId: ModelId? = null
     private val chatMessages = mutableListOf<ChatMessage>()
 
+    // test
     // Should be called once at application start
     override suspend fun init(apiKey: String, modId: String) {
         model = OpenAI(
