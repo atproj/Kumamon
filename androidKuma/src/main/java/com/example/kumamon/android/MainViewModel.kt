@@ -17,28 +17,33 @@ data class Chat(val message: String, val fromUser: Boolean)
 class MainViewModel(private val model: LangMod,
                     private val dispatcher: CoroutineDispatcher = Dispatchers.IO): ViewModel() {
 
-    val conversation = mutableStateListOf(
+    private val _conversation = mutableStateListOf(
             Chat("Hi, I'm Kumamon the sales minister of Kumamoto.", false)
     )
-    var errorMsg: String by mutableStateOf("")
-    var isLoading: Boolean by mutableStateOf(false)
+    val conversation: List<Chat> get() = _conversation
+
+    private var _errorMsg by mutableStateOf("")
+    val errorMsg: String get() = _errorMsg
+
+    private var _isLoading by mutableStateOf(false)
+    val isLoading: Boolean get() = _isLoading
 
     private var numSubmissions = 0
 
     fun onSubmit(text: String) {
         numSubmissions++
         viewModelScope.launch(dispatcher) {
-            conversation.add(
+            _conversation.add(
                 Chat(message = text, fromUser = true)
             )
             try {
                 val reply = model.converse(text)
                 delay(500)
-                conversation.add(
+                _conversation.add(
                     Chat(message = reply, fromUser = false)
                 )
             } catch (ex: Exception) {
-                errorMsg = ex.message.toString()
+                _errorMsg = ex.message.toString()
             }
         }
     }
