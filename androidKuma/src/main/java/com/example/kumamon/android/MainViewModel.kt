@@ -1,52 +1,49 @@
 package com.example.kumamon.android
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kumamon.data.LangMod
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+data class Chat(val message: String, val fromUser: Boolean)
 class MainViewModel(private val model: LangMod,
                     private val dispatcher: CoroutineDispatcher = Dispatchers.IO): ViewModel() {
 
-    private val conversation = mutableListOf(
-        Chat("Hi, I'm Kumamon the sales minister of Kumamoto.", false)
+    private val _conversation = mutableStateListOf(
+            Chat("Hi, I'm Kumamon the sales minister of Kumamoto.", false)
     )
-    private val _uiState = MutableStateFlow<Result<List<Chat>>>(
-        Result.Success(conversation)
-    )
-    val uiState: StateFlow<Result<List<Chat>>> = _uiState
+    val conversation: List<Chat> get() = _conversation
+
+    private var _errorMsg by mutableStateOf("")
+    val errorMsg: String get() = _errorMsg
+
+    private var _isLoading by mutableStateOf(false)
+    val isLoading: Boolean get() = _isLoading
 
     private var numSubmissions = 0
 
     fun onSubmit(text: String) {
         numSubmissions++
         viewModelScope.launch(dispatcher) {
-            conversation.add(
+            _conversation.add(
                 Chat(message = text, fromUser = true)
             )
-            printList(conversation)
-            _uiState.value = Result.Success(conversation)
             try {
-                //val reply = model.converse(text)
-                val reply = when (numSubmissions) {
-                    1 -> "I am a bear"
-                    2 -> "My favorite sport is tennis"
-                    3 -> "I have a couple of foods from Kumamoto I favor.  Including ramen and dumplings"
-                    4 -> "Please come to Kumamoto"
-                    else -> "else"
-                }
-                conversation.add(
+                val reply = model.converse(text)
+                delay(500)
+                _conversation.add(
                     Chat(message = reply, fromUser = false)
                 )
-                printList(conversation)
-                _uiState.value = Result.Success(conversation)
             } catch (ex: Exception) {
-                _uiState.value = Result.Failure(ex)
+                _errorMsg = ex.message.toString()
             }
         }
     }
@@ -59,6 +56,6 @@ class MainViewModel(private val model: LangMod,
                 sb.append(", ")
             }
         }
-        Log.d("TRACE", "post conversation=$sb")
+        Log.d("TRACE", "MainViewModel conversation=$sb")
     }
 }
