@@ -20,7 +20,7 @@ interface LangMod {
 object OaiModel: LangMod {
 
     const val API_KEY = ""
-    const val MODEL_ID = "gpt-3.5-turbo-1106"
+    const val MODEL_ID = ""
 
     lateinit var model: OpenAI private set
     private var modelId: ModelId? = null
