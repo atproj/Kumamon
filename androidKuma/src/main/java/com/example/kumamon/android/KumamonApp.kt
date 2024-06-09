@@ -7,7 +7,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-
 class KumamonApp: Application() {
 
     override fun onCreate() {
@@ -22,5 +21,6 @@ class KumamonApp: Application() {
                 Log.d("TRACE", "problem in OaiModel.init is ${ex.message}")
             }
         }
+
     }
 }
