@@ -7,7 +7,6 @@ import com.aallam.openai.api.chat.chatMessage
 import com.aallam.openai.api.http.Timeout
 import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.client.OpenAI
-import com.example.kumamon.data.OaiModel.model
 import kotlin.time.Duration.Companion.seconds
 
 interface LangMod {
@@ -16,8 +15,6 @@ interface LangMod {
 
     suspend fun converse(incomingMsg: String): String
 
-    suspend fun fineTune(filename: String)
-
 }
 
 object OaiModel: LangMod {
@@ -25,7 +22,7 @@ object OaiModel: LangMod {
     const val API_KEY = ""
     const val MODEL_ID = "gpt-3.5-turbo-1106"
 
-    private var model: OpenAI?= null
+    lateinit var model: OpenAI private set
     private var modelId: ModelId? = null
     private val chatMessages = mutableListOf<ChatMessage>()
 
@@ -37,10 +34,9 @@ object OaiModel: LangMod {
             timeout = Timeout(socket = 10.seconds)
         )
         modelId = ModelId(modId)
-        val chatResponse = receiveResponse(
+        receiveResponse(
             incomingMsg = "Pretend you are Kumamon, the mascot of Kumamoto in your responses."
         )
-
     }
 
     // returns response to a user input
@@ -63,19 +59,9 @@ object OaiModel: LangMod {
         }
         // first response should be an introductory message from kumamon
         // subsequent messages are responses to user submissions
-        model?.let {
-            val response = it.chatCompletion(request)
-            val responseMsg = response.choices.first().message
-            chatMessages.add(responseMsg)
-            return responseMsg
-        }
-        throw IllegalStateException("model was not inititalized properly")
+        val response = model.chatCompletion(request)
+        val responseMsg = response.choices.first().message
+        chatMessages.add(responseMsg)
+        return responseMsg
     }
-
-    // Should be called once at application start
-    override suspend fun fineTune(filename: String) {
-        if (model != null) return
-
-    }
-
 }

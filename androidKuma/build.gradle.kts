@@ -47,5 +47,5 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.activity)
-    implementation(libs.livedata.compose)
+    implementation(libs.openai.client)
 }
