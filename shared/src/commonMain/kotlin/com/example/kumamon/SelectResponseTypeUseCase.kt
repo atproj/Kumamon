@@ -1,6 +1,5 @@
-package com.example.kumamon.android
+package com.example.kumamon
 
-import android.util.Log
 
 class SelectResponseTypeUseCase {
     enum class Response {
@@ -25,10 +24,6 @@ class SelectResponseTypeUseCase {
 
 
     operator fun invoke(incomingMsg: String): Response {
-        val containsCommand = imageCommands.count { imgCmd -> incomingMsg.contains(other = imgCmd, ignoreCase = true) } != 0
-        Log.d("TRACE", "containsCommand=$containsCommand")
-        val containsWord = imageWords.count { imgWord -> incomingMsg.contains(other = imgWord, ignoreCase = true )} != 0
-        Log.d("TRACE", "containsWord=$containsWord")
         if (imageCommands.count { imgCmd -> incomingMsg.contains(other = imgCmd, ignoreCase = true) } != 0 &&
             imageWords.count { imgWord -> incomingMsg.contains(other = imgWord, ignoreCase = true )} != 0) {
             return Response.IMAGE

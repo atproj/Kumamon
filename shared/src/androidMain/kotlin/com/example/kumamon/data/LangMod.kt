@@ -4,10 +4,10 @@ import com.aallam.openai.api.chat.ChatMessage
 import com.aallam.openai.api.chat.ChatRole
 import com.aallam.openai.api.chat.chatCompletionRequest
 import com.aallam.openai.api.chat.chatMessage
-import com.aallam.openai.api.http.Timeout
+import com.aallam.openai.api.image.ImageCreation
+import com.aallam.openai.api.image.ImageSize
 import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.client.OpenAI
-import kotlin.time.Duration.Companion.seconds
 
 interface LangMod {
 
@@ -15,7 +15,11 @@ interface LangMod {
 
     suspend fun converse(incomingMsg: String): String
 
+    suspend fun replyImage(incomingMsg: String): ImageResponse
+
 }
+
+data class ImageResponse(val prompt: String?=null, val imageUrl: String)
 
 object OaiModel: LangMod {
 
@@ -30,8 +34,7 @@ object OaiModel: LangMod {
     // Should be called once at application start
     override suspend fun init(apiKey: String, modId: String) {
         model = OpenAI(
-            token = apiKey,
-            timeout = Timeout(socket = 10.seconds)
+            token = apiKey
         )
         modelId = ModelId(modId)
         receiveResponse(
@@ -43,6 +46,21 @@ object OaiModel: LangMod {
     override suspend fun converse(incomingMsg: String): String {
         val chatResponse = receiveResponse(incomingMsg)
         return chatResponse.content?:"Sorry, I don't know"
+    }
+
+    override suspend fun replyImage(incomingMsg: String): ImageResponse {
+        val images = model.imageURL(
+            creation = ImageCreation(
+                prompt = incomingMsg,
+                model = ModelId("dall-e-3"),
+                n = 1,
+                size = ImageSize.is1024x1024
+            )
+        )
+        return ImageResponse(
+            prompt = images.first().revisedPrompt,
+            imageUrl = images.first().url
+        )
     }
 
     private suspend fun receiveResponse(incomingMsg: String): ChatMessage {
