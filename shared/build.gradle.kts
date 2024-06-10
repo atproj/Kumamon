@@ -23,13 +23,15 @@ kotlin {
         }
     }
 
-
     sourceSets {
         commonMain.dependencies {
             //put your multiplatform dependencies here
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.openai.client)
+
+            // To use to show data and time of chats
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
