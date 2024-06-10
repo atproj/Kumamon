@@ -1,7 +1,6 @@
 package com.example.kumamon.android
 
 import android.speech.tts.TextToSpeech
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,7 +35,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.example.kumamon.model.Chat
 import kotlinx.coroutines.launch
 
@@ -111,6 +109,7 @@ fun ChatBubble(chat: Chat) {
                 // TTS engine is ready
             } else {
                 // Handle initialization error
+                tts.value = null
             }
         })
     }
@@ -145,10 +144,12 @@ fun ChatBubble(chat: Chat) {
 //                        AsyncImage(model = it, contentDescription = null)
 //                    }
 
-                    if (!chat.fromUser) {
-                        // Add a icon to speak the text.
-                        Button(onClick = { speakChatMessage(tts.value, textToSpeak) }) {
-                            Text("Speak")
+                    tts.value?.let {
+                        if (!chat.fromUser) {
+                            // Add a icon to speak the text.
+                            Button(onClick = { speakChatMessage(tts.value, textToSpeak) }) {
+                                Text("Speak")
+                            }
                         }
                     }
                 }
