@@ -9,6 +9,7 @@ ktor = "2.3.11"
 coroutines = "1.8.0"
 oaiclient = "3.7.2"
 extensions = "1.9.0"
+coil = "2.6.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -25,6 +26,7 @@ kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-c
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 openai-client = { module = "com.aallam.openai:openai-client", version.ref = "oaiclient" }
 kotlinx-activity = { module = "androidx.activity:activity-ktx", version.ref = "extensions" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
