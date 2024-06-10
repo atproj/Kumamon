@@ -153,9 +153,11 @@ fun ChatBubble(chat: Chat) {
                         color = if (chat.fromUser) Color.White else Color.Black,
                         modifier = Modifier.padding(8.dp)
                     )
-                    // Add a icon to speak the text.
-                    Button(onClick = { speakChatMessage(tts.value, textToSpeak) }) {
-                        Text("Speak")
+                    if (!chat.fromUser) {
+                        // Add a icon to speak the text.
+                        Button(onClick = { speakChatMessage(tts.value, textToSpeak) }) {
+                            Text("Speak")
+                        }
                     }
                 }
             }
