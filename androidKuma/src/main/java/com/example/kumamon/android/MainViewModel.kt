@@ -9,19 +9,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kumamon.SelectResponseTypeUseCase
 import com.example.kumamon.data.LangMod
+import com.example.kumamon.model.Chat
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-data class Chat(val message: String, val fromUser: Boolean, val imageUrl: String?=null)
+//data class Chat(val message: String, val fromUser: Boolean, val imageUrl: String?=null)
+
 class MainViewModel(private val selectResponseTypeUseCase: SelectResponseTypeUseCase,
                     private val model: LangMod,
                     private val dispatcher: CoroutineDispatcher = Dispatchers.IO): ViewModel() {
 
     private val _conversation = mutableStateListOf(
-            Chat("Hi, I'm Kumamon the sales minister of Kumamoto.  If you want me a picture " +
-                "in my response say \'Show me a picture of...\'", false)
+//        Chat("Hi, I'm Kumamon the sales minister of Kumamoto.  If you want me a picture " +
+//                "in my response say \'Show me a picture of...\'", false)
+        Chat()  // initialize the chat
+
     )
     val conversation: List<Chat> get() = _conversation
 
