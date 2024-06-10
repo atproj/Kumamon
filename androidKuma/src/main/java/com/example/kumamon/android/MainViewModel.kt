@@ -8,17 +8,17 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kumamon.data.LangMod
+import com.example.kumamon.model.Chat
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-data class Chat(val message: String, val fromUser: Boolean)
 class MainViewModel(private val model: LangMod,
                     private val dispatcher: CoroutineDispatcher = Dispatchers.IO): ViewModel() {
 
     private val _conversation = mutableStateListOf(
-            Chat("Hi, I'm Kumamon the sales minister of Kumamoto.", false)
+        Chat()  // initialize the chat
     )
     val conversation: List<Chat> get() = _conversation
 

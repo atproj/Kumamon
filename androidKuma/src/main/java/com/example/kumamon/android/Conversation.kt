@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
+import com.example.kumamon.model.Chat
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
