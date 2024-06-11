@@ -63,21 +63,6 @@ object OaiModel: LangMod {
         )
     }
 
-    override suspend fun replyImage(incomingMsg: String): ImageResponse {
-        val images = model.imageURL(
-            creation = ImageCreation(
-                prompt = incomingMsg,
-                model = ModelId("dall-e-3"),
-                n = 1,
-                size = ImageSize.is1024x1024
-            )
-        )
-        return ImageResponse(
-            prompt = images.first().revisedPrompt,
-            imageUrl = images.first().url
-        )
-    }
-
     private suspend fun receiveResponse(incomingMsg: String): ChatMessage {
         // user message
         chatMessages.add(
