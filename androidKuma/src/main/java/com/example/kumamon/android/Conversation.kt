@@ -147,13 +147,14 @@ fun ChatBubble(chat: Chat) {
                     }
 
                     tts.value?.let {
-                        if (!chat.fromUser) {
+                        if (!chat.fromUser && chat.imageUrl == null) {
                             // Add a icon to speak the text.
                             Button(onClick = { speakChatMessage(tts.value, textToSpeak) }) {
                                 Text("Speak")
                             }
                         }
                     }
+
                 }
             }
         }
