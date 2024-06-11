@@ -142,9 +142,9 @@ fun ChatBubble(chat: Chat) {
                         )
                     }
 
-//                    chat.imageUrl?.let {
-//                        AsyncImage(model = it, contentDescription = null)
-//                    }
+                    chat.imageUrl?.let {
+                        AsyncImage(model = it, contentDescription = null)
+                    }
 
                     tts.value?.let {
                         if (!chat.fromUser) {
