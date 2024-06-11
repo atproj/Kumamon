@@ -45,7 +45,22 @@ object OaiModel: LangMod {
     // returns response to a user input
     override suspend fun converse(incomingMsg: String): String {
         val chatResponse = receiveResponse(incomingMsg)
-        return chatResponse.content?:"Sorry, I don't know"
+        return chatResponse.content ?: "Sorry, I am unable to answer at this time."
+    }
+
+    override suspend fun replyImage(incomingMsg: String): ImageResponse {
+        val images = model.imageURL(
+            creation = ImageCreation(
+                prompt = incomingMsg,
+                model = ModelId("dall-e-3"),
+                n = 1,
+                size = ImageSize.is1024x1024
+            )
+        )
+        return ImageResponse(
+            prompt = images.first().revisedPrompt,
+            imageUrl = images.first().url
+        )
     }
 
     override suspend fun replyImage(incomingMsg: String): ImageResponse {
