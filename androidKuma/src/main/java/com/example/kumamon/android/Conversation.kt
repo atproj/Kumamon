@@ -1,8 +1,8 @@
 package com.example.kumamon.android
 
 import android.speech.tts.TextToSpeech
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -140,23 +140,25 @@ fun ChatBubble(chat: Chat) {
             shadowElevation = 4.dp,
             modifier = Modifier.padding(4.dp)
         ) {
-            if (chat.message.isNotBlank()) {
-                Text(
-                    text = chat.message,
-                    color = if (chat.fromUser) Color.White else Color.Black,
-                    modifier = Modifier.padding(8.dp)
-                )
-            }
+            Column {
+                if (chat.message.isNotBlank()) {
+                    Text(
+                        text = chat.message,
+                        color = if (chat.fromUser) Color.White else Color.Black,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
 
-            chat.imageUrl?.let {
-                AsyncImage(model = it, contentDescription = null)
-            }
+                chat.imageUrl?.let {
+                    AsyncImage(model = it, contentDescription = null)
+                }
 
-            tts.value?.let {
-                if (chat.enableDictation) {
-                    // Add a icon to speak the text.
-                    Button(onClick = { speakChatMessage(tts.value, textToSpeak) }) {
-                        Text("Speak")
+                tts.value?.let {
+                    if (chat.enableDictation) {
+                        // Add a icon to speak the text.
+                        Button(onClick = { speakChatMessage(tts.value, textToSpeak) }) {
+                            Text("Speak")
+                        }
                     }
                 }
             }
