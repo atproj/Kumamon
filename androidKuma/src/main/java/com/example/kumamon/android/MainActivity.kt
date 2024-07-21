@@ -26,9 +26,6 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Conversation(viewModel)
-                    Column {
-                        Conversation(viewModel)
-                    }
                 }
             }
         }

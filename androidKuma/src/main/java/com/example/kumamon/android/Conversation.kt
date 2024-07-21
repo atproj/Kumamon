@@ -1,9 +1,9 @@
 package com.example.kumamon.android
 
-
 import android.speech.tts.TextToSpeech
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,7 +26,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -36,15 +35,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.kumamon.model.Chat
-import kotlinx.coroutines.launch
 
 @Composable
 fun Conversation(viewModel: MainViewModel) {
     var currentMsg by rememberSaveable { mutableStateOf("") }
-    val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
+    val conversation = viewModel.conversation.collectAsStateWithLifecycle().value
     Scaffold(
         bottomBar = {
             BottomAppBar {
@@ -68,9 +66,9 @@ fun Conversation(viewModel: MainViewModel) {
                         viewModel.onSubmit(currentMsg)
                         currentMsg = ""
                         softKeyboard?.hide()
-                        coroutineScope.launch {
+                        /*coroutineScope.launch {
                             listState.animateScrollToItem(viewModel.conversation.size-1)
-                        }
+                        }*/
                     }) {
                         Text("Send")
                     }
@@ -78,22 +76,32 @@ fun Conversation(viewModel: MainViewModel) {
             }
         }
     ) { innerPadding ->
-        if (viewModel.isLoading) {
-            // Loading State for Reply
-        } else {
-            if (viewModel.errorMsg.isBlank()) {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .padding(innerPadding)
-                ) {
-                    items(viewModel.conversation) { message ->
-                        ChatBubble(message)
-                    }
-                }
-            } else {
-                // append error message and retry to bottom
+        //val conversation = viewModel.conversation.collectAsStateWithLifecycle().value
+        when (conversation) {
+            is ResultState.Success.NonEmpty -> Conversation(conversation.value, innerPadding)
+            is ResultState.Success.Empty -> {
+                // no-op as a conversation is always initialized
             }
+            is ResultState.Loading -> {
+                // append a loading message bubble from kumamon
+            }
+            is ResultState.Failure -> {
+                // show a snackbar with a retry button
+            }
+        }
+    }
+}
+
+@Composable
+fun Conversation(chats: List<Chat>, innerPadding: PaddingValues) {
+    val listState = rememberLazyListState()
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .padding(innerPadding)
+    ) {
+        items(chats) { chat ->
+            ChatBubble(chat)
         }
     }
 }
@@ -118,43 +126,38 @@ fun ChatBubble(chat: Chat) {
 
     val backgroundColor = if (chat.fromUser) MaterialTheme.colorScheme.primary
     else MaterialTheme.colorScheme.surface
-    val alignment = if (chat.fromUser) Arrangement.End else Arrangement.Start
+    val arrangement = if (chat.fromUser) Arrangement.End else Arrangement.Start
 
-    MyApplicationTheme {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = alignment
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        horizontalArrangement = arrangement,
+    ) {
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = backgroundColor,
+            shadowElevation = 4.dp,
+            modifier = Modifier.padding(4.dp)
         ) {
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = backgroundColor,
-                shadowElevation = 4.dp,
-                modifier = Modifier.padding(4.dp)
-            ) {
-                Column {
-                    if (chat.message.isNotBlank()) {
-                        Text(
-                            text = chat.message,
-                            color = if (chat.fromUser) Color.White else Color.Black,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
+            if (chat.message.isNotBlank()) {
+                Text(
+                    text = chat.message,
+                    color = if (chat.fromUser) Color.White else Color.Black,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
 
-                    chat.imageUrl?.let {
-                        AsyncImage(model = it, contentDescription = null)
-                    }
+            chat.imageUrl?.let {
+                AsyncImage(model = it, contentDescription = null)
+            }
 
-                    tts.value?.let {
-                        if (!chat.fromUser && chat.imageUrl == null) {
-                            // Add a icon to speak the text.
-                            Button(onClick = { speakChatMessage(tts.value, textToSpeak) }) {
-                                Text("Speak")
-                            }
-                        }
+            tts.value?.let {
+                if (chat.enableDictation) {
+                    // Add a icon to speak the text.
+                    Button(onClick = { speakChatMessage(tts.value, textToSpeak) }) {
+                        Text("Speak")
                     }
-
                 }
             }
         }

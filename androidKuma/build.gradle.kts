@@ -48,4 +48,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.activity)
     implementation(libs.coil.compose)
+    implementation(libs.flow.compose)
+    testImplementation(libs.kotlin.test)
 }
