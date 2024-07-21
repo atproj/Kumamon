@@ -1,6 +1,9 @@
 package com.example.kumamon.android
 
+import android.speech.tts.TextToSpeech
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,24 +21,28 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import kotlinx.coroutines.launch
+import com.example.kumamon.model.Chat
 
 @Composable
 fun Conversation(viewModel: MainViewModel) {
     var currentMsg by rememberSaveable { mutableStateOf("") }
-    val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
+    val conversation = viewModel.conversation.collectAsStateWithLifecycle().value
     Scaffold(
         bottomBar = {
             BottomAppBar {
@@ -59,9 +66,9 @@ fun Conversation(viewModel: MainViewModel) {
                         viewModel.onSubmit(currentMsg)
                         currentMsg = ""
                         softKeyboard?.hide()
-                        coroutineScope.launch {
+                        /*coroutineScope.launch {
                             listState.animateScrollToItem(viewModel.conversation.size-1)
-                        }
+                        }*/
                     }) {
                         Text("Send")
                     }
@@ -69,37 +76,63 @@ fun Conversation(viewModel: MainViewModel) {
             }
         }
     ) { innerPadding ->
-        if (viewModel.isLoading) {
-            // Loading State for Reply
-        } else {
-            if (viewModel.errorMsg.isBlank()) {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .padding(innerPadding)
-                ) {
-                    items(viewModel.conversation) { message ->
-                        ChatBubble(message)
-                    }
-                }
-            } else {
-                // append error message and retry to bottom
+        //val conversation = viewModel.conversation.collectAsStateWithLifecycle().value
+        when (conversation) {
+            is ResultState.Success.NonEmpty -> Conversation(conversation.value, innerPadding)
+            is ResultState.Success.Empty -> {
+                // no-op as a conversation is always initialized
+            }
+            is ResultState.Loading -> {
+                // append a loading message bubble from kumamon
+            }
+            is ResultState.Failure -> {
+                // show a snackbar with a retry button
             }
         }
     }
 }
 
 @Composable
+fun Conversation(chats: List<Chat>, innerPadding: PaddingValues) {
+    val listState = rememberLazyListState()
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .padding(innerPadding)
+    ) {
+        items(chats) { chat ->
+            ChatBubble(chat)
+        }
+    }
+}
+
+@Composable
 fun ChatBubble(chat: Chat) {
+    val context = LocalContext.current
+    val textToSpeak by remember { mutableStateOf(chat.message) }
+    val tts = remember { mutableStateOf<TextToSpeech?>(null) }
+
+    // Initialize TextToSpeech
+    LaunchedEffect(Unit) {
+        tts.value = TextToSpeech(context, TextToSpeech.OnInitListener { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                // TTS engine is ready
+            } else {
+                // Handle initialization error
+                tts.value = null
+            }
+        })
+    }
+
     val backgroundColor = if (chat.fromUser) MaterialTheme.colorScheme.primary
     else MaterialTheme.colorScheme.surface
-    val alignment = if (chat.fromUser) Arrangement.End else Arrangement.Start
+    val arrangement = if (chat.fromUser) Arrangement.End else Arrangement.Start
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        horizontalArrangement = alignment
+        horizontalArrangement = arrangement,
     ) {
         Surface(
             shape = RoundedCornerShape(8.dp),
@@ -114,9 +147,38 @@ fun ChatBubble(chat: Chat) {
                     modifier = Modifier.padding(8.dp)
                 )
             }
+
             chat.imageUrl?.let {
                 AsyncImage(model = it, contentDescription = null)
             }
+
+            tts.value?.let {
+                if (chat.enableDictation) {
+                    // Add a icon to speak the text.
+                    Button(onClick = { speakChatMessage(tts.value, textToSpeak) }) {
+                        Text("Speak")
+                    }
+                }
+            }
         }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            tts.value?.stop()
+            tts.value?.shutdown()
+        }
+    }
+}
+
+fun speakChatMessage(tts: TextToSpeech?, text: String) {
+    tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+}
+
+@Preview
+@Composable
+fun ChatPreview() {
+    MyApplicationTheme {
+        ChatBubble(Chat())
     }
 }
