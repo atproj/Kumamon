@@ -23,4 +23,10 @@ class SelectResponseTypeUseCaseTest {
         val responseType = selectResponseTypeUseCase.invoke("what is your favorite sport?")
         assertEquals(responseType, SelectResponseTypeUseCase.Response.TEXT)
     }
+
+    @Test
+    fun `a message prefixed with a translation prompt should return a translation response type`() {
+        val responseType = selectResponseTypeUseCase.invoke("Translate in japanese May I request a beer?")
+        assertEquals(responseType, SelectResponseTypeUseCase.Response.TRANSLATION)
+    }
 }
