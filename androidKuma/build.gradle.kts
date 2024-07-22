@@ -50,4 +50,6 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.flow.compose)
     testImplementation(libs.kotlin.test)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockk)
 }
