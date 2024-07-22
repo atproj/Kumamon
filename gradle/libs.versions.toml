@@ -11,6 +11,8 @@ oaiclient = "3.7.2"
 extensions = "1.9.0"
 coil = "2.6.0"
 flow-compose = "2.6.2"
+coroutines-test = "1.6.4"
+mockk = "1.13.2"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -29,6 +31,8 @@ openai-client = { module = "com.aallam.openai:openai-client", version.ref = "oai
 kotlinx-activity = { module = "androidx.activity:activity-ktx", version.ref = "extensions" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 flow-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "flow-compose" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines-test" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
